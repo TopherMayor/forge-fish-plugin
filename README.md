@@ -2,6 +2,21 @@
 
 A fish-native integration for [Forge](https://github.com/TopherMayor/forge) that mirrors the zsh plugin’s core workflows as closely as fish allows.
 
+## At a glance
+
+| Category | Status |
+| --- | --- |
+| Auto-load integration | Yes |
+| Forge-aware right prompt | Yes |
+| Prompt command dispatch | Yes |
+| Conversation helpers | Yes |
+| Model/provider pickers | Yes |
+| Workspace helpers | Yes |
+| Commit/suggestion helpers | Yes |
+| Fish key bindings | Yes |
+| Fish completions | Yes |
+| Native zsh parity | Partial |
+
 ## What it provides
 
 - An auto-loaded fish integration via `~/.config/fish/conf.d/forge.fish`
