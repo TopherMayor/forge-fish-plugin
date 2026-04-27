@@ -37,31 +37,25 @@ The completion file at `~/.config/fish/completions/forge.fish` is also loaded au
 
 The fish plugin is **functionally close** to the native zsh plugin, but it is **not 1:1**.
 
-### High parity
+### Usage comparison
 
-- Interactive action surface
-- Conversation/model/provider selectors
-- Forge-aware prompt/status display
-- Prompt-driven command dispatch
-- Keybinding-driven workflow
+| Area | Fish plugin | Native zsh plugin | Status |
+| --- | --- | --- | --- |
+| Startup/loading | Auto-loads through `~/.config/fish/conf.d/forge.fish` | Loaded through `eval "$(forge zsh plugin)"` and `eval "$(forge zsh theme)"` in `.zshrc` | Different shell-native plumbing |
+| Prompt/status | Fish right prompt shows Forge status, active agent, model, effort, and conversation id | zsh theme sets `RPROMPT` with Forge status | Similar intent, different implementation |
+| Command dispatch | Uses `:` commands in the fish command line | Uses zsh editor hooks and line-editing behavior | High functional overlap |
+| Selectors | Provides fish pickers for conversations, models, providers, and agents | Uses native zsh selection helpers | Similar workflow |
+| Key bindings | Binds Enter, Tab, and Ctrl-V for Forge actions | Uses `zle`-based bindings | Same intent, different editor model |
+| Completions | Fish completions for top-level commands and key flags | Rich generated completion tree in zsh | Fish is lighter |
 
-### Medium parity
+### Current missing parity
 
-- Prompt styling and theme behavior
-- Selector behavior and buffer editing flow
-
-### Lower parity
-
-- Completion depth
-- Exact zsh editor integration
-- Native zsh theme internals
-
-## Key differences from zsh
-
-- zsh uses `eval "$(forge zsh plugin)"` and `eval "$(forge zsh theme)"`
-- fish uses native auto-load integration through `conf.d` and `completions`
-- fish uses `commandline`/bindings instead of zsh’s `zle`-based editor model
-- fish completions are useful, but not as exhaustive as the zsh plugin’s generated completion tree
+| Missing or partial parity | What is different | Impact |
+| --- | --- | --- |
+| Completion depth | Fish completions are narrower than the zsh plugin’s generated completion tree | Fewer nested subcommand suggestions |
+| Exact theme fidelity | Fish has its own right prompt formatting instead of the zsh `RPROMPT` theme path | Visual output differs |
+| Editor integration | Fish uses `commandline`/bind handlers instead of zsh `zle` workflows | Same goal, different mechanics |
+| Native zsh-only behavior | Some zsh plugin internals are shell-specific and not directly portable | Not a literal 1:1 port |
 
 ## Usage
 
