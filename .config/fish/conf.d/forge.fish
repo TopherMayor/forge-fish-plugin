@@ -16,6 +16,15 @@ if status --is-interactive
         type -q $cmd
     end
 
+    function __forge_fzf
+        if type -q fzf
+            command fzf $argv
+            return $status
+        end
+
+        return 1
+    end
+
     function __forge_short_id --argument-names value
         if test -z "$value" -o "$value" = "[empty]"
             return 0
@@ -62,17 +71,23 @@ if status --is-interactive
         echo 1
     end
 
-    function __forge_complete_action_names
-        command $_FORGE_BIN list commands --porcelain 2>/dev/null | while read -l line
-            if string match -rq '^\\s*COMMAND\\b' -- $line
-                continue
-            end
-
-            set -l action (string replace -r '^\\s*([a-z][a-z0-9_-]*).*$' '$1' -- $line)
-            if test -n "$action"; and test "$action" != "$line"
-                echo $action
-            end
+    function __forge_command_type --argument-names action_name
+        if test -z "$action_name"
+            return 1
         end
+
+        set -l command_row (command $_FORGE_BIN list commands --porcelain 2>/dev/null | string match -r "^$action_name\\b.*")
+        if test -z "$command_row"
+            return 1
+        end
+
+        set command_row $command_row[1]
+        set -l command_type (string replace -r '^\\s*[^[:space:]]+\\s+([A-Z]+)\\s+.*$' '$1' -- $command_row)
+        if test "$command_type" = "$command_row"
+            return 1
+        end
+
+        echo (string lower -- $command_type)
     end
 
 
@@ -255,12 +270,13 @@ if status --is-interactive
     end
 
     function __forge_action_new --argument-names input_text
-        set -e -U _FORGE_CONVERSATION_ID
-        set -U _FORGE_PREVIOUS_CONVERSATION_ID ""
+        set -e _FORGE_CONVERSATION_ID
+        set -g _FORGE_PREVIOUS_CONVERSATION_ID ""
+        set -g _FORGE_ACTIVE_AGENT forge
         if test -n "$input_text"
             set -l new_id (command $_FORGE_BIN conversation new 2>/dev/null)
             if test -n "$new_id"
-                set -U _FORGE_CONVERSATION_ID $new_id
+                set -g _FORGE_CONVERSATION_ID $new_id
                 command $_FORGE_BIN --conversation-id "$new_id" --prompt "$input_text"
             else
                 command $_FORGE_BIN --prompt "$input_text"
@@ -276,6 +292,21 @@ if status --is-interactive
         else
             command $_FORGE_BIN info
         end
+    end
+
+    function __forge_action_agent --argument-names input_text
+        if test -z "$input_text"
+            set -l selected (__forge_pick_agent '' '')
+            if test -n "$selected"
+                set input_text (string split -m 1 '  ' -- $selected)[1]
+            end
+        end
+
+        if test -z "$input_text"
+            return 0
+        end
+
+        set -U _FORGE_ACTIVE_AGENT $input_text
     end
 
     function __forge_action_help
@@ -294,12 +325,11 @@ if status --is-interactive
             return 0
         end
 
-        set -U _FORGE_PREVIOUS_CONVERSATION_ID $_FORGE_CONVERSATION_ID
-        set -U _FORGE_CONVERSATION_ID $input_text
+        set -g _FORGE_PREVIOUS_CONVERSATION_ID $_FORGE_CONVERSATION_ID
+        set -g _FORGE_CONVERSATION_ID $input_text
         command $_FORGE_BIN conversation show "$input_text"
         command $_FORGE_BIN conversation info "$input_text"
     end
-
     function __forge_action_clone --argument-names input_text
         if test -z "$input_text"
             set -l selected (__forge_pick_conversation)
@@ -601,36 +631,42 @@ if status --is-interactive
     end
 
     function __forge_action_default --argument-names user_action input_text
+    function __forge_action_default --argument-names user_action input_text
         if test -n "$user_action"
-            set -l command_row (command $_FORGE_BIN list commands --porcelain 2>/dev/null | string match -r "^$user_action\\b.*")
-            if test -z "$command_row"
+            set -l command_type (__forge_command_type $user_action)
+            if test -z "$command_type"
                 return 1
             end
-        end
 
-        if test -z "$input_text"
-            if test -n "$user_action"
+            if test -z "$input_text"
                 if test "$user_action" = ask
                     set user_action sage
                 else if test "$user_action" = plan
                     set user_action muse
                 end
-                if test "$user_action" = agent
-                    set -U _FORGE_ACTIVE_AGENT forge
+
+                if test "$command_type" = agent
+                    set -g _FORGE_ACTIVE_AGENT $user_action
                 end
+                return 0
             end
+        end
+
+        if test -z "$input_text"
             return 0
         end
 
         if test -z "$_FORGE_CONVERSATION_ID"
             set -l new_id (command $_FORGE_BIN conversation new 2>/dev/null)
             if test -n "$new_id"
-                set -U _FORGE_CONVERSATION_ID $new_id
+                set -g _FORGE_CONVERSATION_ID $new_id
             end
         end
+
         if test -n "$user_action"
-            set -U _FORGE_ACTIVE_AGENT $user_action
+            set -g _FORGE_ACTIVE_AGENT $user_action
         end
+
         command $_FORGE_BIN --conversation-id "$_FORGE_CONVERSATION_ID" --prompt "$input_text"
     end
 
@@ -664,7 +700,7 @@ if status --is-interactive
             case retry r
                 __forge_action_retry
             case agent a
-                __forge_action_default agent $input_text
+                __forge_action_agent $input_text
             case conversation c
                 __forge_action_conversation $input_text
             case config-model cm
@@ -731,7 +767,6 @@ if status --is-interactive
         end
         commandline -f execute
     end
-
     function __forge_tab_complete
         set -l buffer (commandline -b)
         set -l token (commandline -ct)

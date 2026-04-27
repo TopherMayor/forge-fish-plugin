@@ -1,7 +1,6 @@
 # Forge Fish Plugin
 
-- Fish completion support for `forge`
-- Session state persists across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent.
+Forge's fish integration for prompt dispatch, command helpers, pickers, completions, and session persistence.
 
 ## At a glance
 
@@ -11,6 +10,7 @@
 | Forge-aware right prompt | Yes |
 | Prompt command dispatch | Yes |
 | Conversation helpers | Yes |
+| Agent switching | Yes |
 | Model/provider pickers | Yes |
 | Workspace helpers | Yes |
 | Commit/suggestion helpers | Yes |
@@ -26,7 +26,10 @@
   - model
   - reasoning effort
   - short conversation id
-- Interactive command dispatch from the prompt using `:` commands, with Forge responses starting on a fresh line
+- Prompt command dispatch from the fish command line
+- `:new` starts a fresh conversation and resets the active agent to `forge`
+- `:agent` opens an interactive agent picker
+- Bare agent commands like `:forge`, `:muse`, and `:sage` switch agents directly
 - Conversation helpers:
   - new
   - switch
@@ -40,7 +43,7 @@
 - Configuration helpers for model, commit model, suggest model, and reasoning effort
 - Workspace helpers
 - Commit and suggestion helpers
-- Session state persists across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent.
+- Session state persists across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent
 
 ## How it loads
 
@@ -50,7 +53,7 @@ The completion file at `~/.config/fish/completions/forge.fish` is also loaded au
 
 ## Feature parity with the native zsh plugin
 
-The fish plugin is **functionally close** to the native zsh plugin, but it is **not 1:1**.
+The fish plugin is functionally close to the native zsh plugin, but it is not 1:1.
 
 ### Usage comparison
 
@@ -68,7 +71,7 @@ The fish plugin is **functionally close** to the native zsh plugin, but it is **
 
 | Missing or partial parity | What is different | Impact |
 | --- | --- | --- |
-| Completion depth | Fish completions now cover more root commands, help targets, zsh helpers, and key flags, but still do not match the zsh plugin’s generated tree | Fewer nested subcommand suggestions |
+| Completion depth | Fish completions cover the common root commands, help targets, zsh helpers, and key flags, but still do not match the zsh plugin’s generated tree | Fewer nested subcommand suggestions |
 | Editor integration | Fish uses `commandline`/bind handlers instead of zsh `zle` workflows | Same goal, different mechanics |
 | Native zsh-only behavior | Some zsh plugin internals are shell-specific and not directly portable | Not a literal 1:1 port |
 
@@ -87,6 +90,8 @@ Prompt commands can be entered directly into the fish command line, for example:
 ```fish
 :help
 :new
+:agent
+:forge
 :conversation
 :model
 :provider-login
@@ -102,6 +107,6 @@ Prompt commands can be entered directly into the fish command line, for example:
 
 This repo contains the fish integration files only. It is intended to be a practical fish-native equivalent of the Forge zsh plugin rather than a literal port.
 
-Recent updates also ensure Forge responses appear on their own line, which keeps the command flow closer to the zsh plugin’s editor-driven output separation.
+Forge responses appear on their own line so the command flow stays close to the zsh plugin’s editor-driven output separation.
 
-Session state now persists across fish shells using universal variables, so your last conversation, model, provider, reasoning effort, and active agent come back automatically when you open a new fish session.
+Session state persists across fish shells using universal variables, so your last conversation, model, provider, reasoning effort, and active agent come back automatically when you open a new fish session.
