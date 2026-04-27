@@ -25,7 +25,7 @@ A fish-native integration for [Forge](https://github.com/TopherMayor/forge) that
   - model
   - reasoning effort
   - short conversation id
-- Interactive command dispatch from the prompt using `:` commands
+- Interactive command dispatch from the prompt using `:` commands, with Forge responses starting on a fresh line
 - Conversation helpers:
   - new
   - switch
@@ -57,8 +57,8 @@ The fish plugin is **functionally close** to the native zsh plugin, but it is **
 | Area | Fish plugin | Native zsh plugin | Status |
 | --- | --- | --- | --- |
 | Startup/loading | Auto-loads through `~/.config/fish/conf.d/forge.fish` | Loaded through `eval "$(forge zsh plugin)"` and `eval "$(forge zsh theme)"` in `.zshrc` | Different shell-native plumbing |
-| Prompt/status | Fish right prompt shows Forge status, active agent, model, effort, and conversation id | zsh theme sets `RPROMPT` with Forge status | Similar intent, different implementation |
-| Command dispatch | Uses `:` commands in the fish command line | Uses zsh editor hooks and line-editing behavior | High functional overlap |
+| Prompt/status | Fish right prompt shows Forge status, active agent, model, effort, and conversation id | zsh theme sets `RPROMPT` with Forge status | Similar intent, different implementation; fish now also starts responses on a fresh line |
+| Command dispatch | Uses `:` commands in the fish command line, and inserts a leading newline before Forge output | Uses zsh editor hooks and line-editing behavior | High functional overlap |
 | Selectors | Provides fish pickers for conversations, models, providers, and agents | Uses native zsh selection helpers | Similar workflow |
 | Key bindings | Binds Enter, Tab, and Ctrl-V for Forge actions | Uses `zle`-based bindings | Same intent, different editor model |
 | Completions | Fish completions for top-level commands and key flags | Rich generated completion tree in zsh | Fish is lighter |
@@ -101,3 +101,6 @@ Prompt commands can be entered directly into the fish command line, for example:
 ## Notes
 
 This repo contains the fish integration files only. It is intended to be a practical fish-native equivalent of the Forge zsh plugin rather than a literal port.
+
+Recent updates also ensure Forge responses appear on their own line, which keeps the command flow closer to the zsh plugin’s editor-driven output separation.
+

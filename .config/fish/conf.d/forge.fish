@@ -180,6 +180,11 @@ if status --is-interactive
         command $_FORGE_BIN config get reasoning-effort 2>/dev/null
     end
 
+    function __forge_info_porcelain
+        __forge_command_available $_FORGE_BIN; or return
+        command $_FORGE_BIN info --porcelain 2>/dev/null
+    end
+
     function __forge_prompt_segment
         __forge_command_available $_FORGE_BIN; or return
 
@@ -635,6 +640,8 @@ if status --is-interactive
             return 1
         end
 
+        printf '\n'
+
         set -l raw (string replace -r '^:\s*' '' -- $trimmed)
         set -l parts (string split -m 1 ' ' -- $raw)
         set -l action $parts[1]
@@ -711,7 +718,7 @@ if status --is-interactive
             case logout
                 __forge_action_logout $input_text
             case '*'
-                __forge_action_default $action $input_text
+                __forge_action_default "" $raw
         end
     end
 
