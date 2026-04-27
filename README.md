@@ -44,6 +44,7 @@ Forge's fish integration for prompt dispatch, command helpers, pickers, completi
 - Workspace helpers
 - Commit and suggestion helpers
 - Session state persists across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent
+- Provider login/logout picker selections resolve to Forge provider IDs, so the fish plugin uses the same canonical identifier whether you choose a provider by name or ID
 
 ## How it loads
 
@@ -64,16 +65,34 @@ The fish plugin is functionally close to the native zsh plugin, but it is not 1:
 | Command dispatch | Uses `:` commands in the fish command line, and inserts a leading newline before Forge output | Uses zsh editor hooks and line-editing behavior | High functional overlap |
 | Selectors | Provides fish pickers for conversations, models, providers, and agents | Uses native zsh selection helpers | Similar workflow |
 | Key bindings | Binds Enter, Tab, and Ctrl-V for Forge actions | Uses `zle`-based bindings | Same intent, different editor model |
-| Fish completions | Fish completions for top-level commands, help targets, zsh helpers, and key flags | Rich generated completion tree in zsh | Fish is lighter |
+| Providers | Provider picker returns provider IDs, so `:provider-login` and `:logout` use the correct Forge identifier | Provider selection is id-based in zsh too | Same target, fish now avoids name/id mismatches |
+| Fish completions | Fish completions for top-level commands, help targets, provider commands, zsh helpers, and key flags | Rich generated completion tree in zsh | Fish is lighter |
 | Session restoration | Fish restores conversation, model, provider, reasoning effort, and active agent from universal variables | zsh keeps session state within the current shell/plugin context | Fish is persistent across shells |
 
 ### Current missing parity
 
 | Missing or partial parity | What is different | Impact |
 | --- | --- | --- |
-| Completion depth | Fish completions cover the common root commands, help targets, zsh helpers, and key flags, but still do not match the zsh plugin’s generated tree | Fewer nested subcommand suggestions |
+| Completion depth | Fish completions cover the common root commands, help targets, provider commands, zsh helpers, and key flags, but still do not match the zsh plugin’s generated tree | Fewer nested subcommand suggestions |
 | Editor integration | Fish uses `commandline`/bind handlers instead of zsh `zle` workflows | Same goal, different mechanics |
 | Native zsh-only behavior | Some zsh plugin internals are shell-specific and not directly portable | Not a literal 1:1 port |
+
+### Completion details
+
+The biggest completion gaps are:
+
+- deeper nested subcommand trees
+- richer argument completion for prompt commands
+- value completion for model, provider, conversation, and agent arguments
+- more exhaustive `forge zsh` helper coverage
+
+### Editor details
+
+The biggest editor gaps are:
+
+- zsh `zle` widgets are more native than fish `commandline` handlers
+- fish can submit and rewrite lines, but it does not share zsh’s editor model
+- picker cancellations and cursor restoration can still feel less integrated than zsh
 
 ## Usage
 
@@ -98,6 +117,8 @@ Prompt commands can be entered directly into the fish command line, for example:
 :commit
 ```
 
+Provider login/logout commands accept either a provider name or provider ID, but interactive selection always resolves to the provider's canonical ID before login/logout runs.
+
 ## Files
 
 - `~/.config/fish/conf.d/forge.fish`
@@ -109,4 +130,6 @@ This repo contains the fish integration files only. It is intended to be a pract
 
 Forge responses appear on their own line so the command flow stays close to the zsh plugin’s editor-driven output separation.
 
-Session state persists across fish shells using universal variables, so your last conversation, model, provider, reasoning effort, and active agent come back automatically when you open a new fish session.
+- `provider` commands complete with provider IDs so provider login/logout uses the correct Forge identifier
+- `provider login` and `provider logout` now resolve selected providers to IDs before invoking Forge
+- session state continues to persist across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent

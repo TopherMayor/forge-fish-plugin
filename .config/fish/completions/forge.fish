@@ -1,3 +1,43 @@
+function __forge_complete_provider_targets
+    command forge list provider --porcelain 2>/dev/null | while read -l line
+        if string match -rq '^NAME\s+ID\s+HOST\s+LOGGED IN$' -- $line
+            continue
+        end
+
+        set -l normalized (string replace -ar '\\s{2,}' '\t' -- $line)
+        set -l fields (string split \t -- $normalized)
+        if test (count $fields) -lt 2
+            continue
+        end
+
+        set -l id $fields[2]
+        set -l name $fields[1]
+        set -l host ""
+        if test (count $fields) -ge 3
+            set host $fields[3]
+        end
+
+        set -l status ""
+        if test (count $fields) -ge 4; and test "$fields[4]" = "[yes]"
+            set status ' [yes]'
+        end
+
+        set -l desc $name
+        if test -n "$host"; and test "$host" != "[empty]"
+            set desc "$desc ($host)"
+        end
+        set desc "$desc$status"
+        printf '%s\t%s\n' $id $desc
+    end
+end
+
+function __forge_complete_provider_commands
+    printf '%s\t%s\n' login 'Authenticate with an API provider'
+    printf '%s\t%s\n' logout 'Remove provider credentials'
+    printf '%s\t%s\n' list 'List available providers'
+    printf '%s\t%s\n' help 'Print this message or the help of the given subcommand(s)'
+end
+
 function __forge_complete_root_commands
     forge --help 2>/dev/null | while read -l line
         if string match -rq '^  [a-z][a-z0-9_-]+\s{2,}' -- $line
@@ -40,6 +80,11 @@ end
 complete -c forge -f
 complete -c forge -n '__fish_use_subcommand' -a '(__forge_complete_root_commands)'
 complete -c forge -n '__fish_seen_subcommand_from help' -a '(__forge_complete_prompt_commands)'
+complete -c forge -n '__fish_seen_subcommand_from provider' -a '(__forge_complete_provider_commands)'
+complete -c forge -n '__fish_seen_subcommand_from provider login' -a '(__forge_complete_provider_targets)'
+complete -c forge -n '__fish_seen_subcommand_from provider logout' -a '(__forge_complete_provider_targets)'
+complete -c forge -n '__fish_seen_subcommand_from provider list' -l porcelain -d 'Output in machine-readable format'
+complete -c forge -n '__fish_seen_subcommand_from provider' -l porcelain -d 'Output in machine-readable format'
 complete -c forge -n '__fish_seen_subcommand_from zsh help' -a '(__forge_complete_zsh_commands)'
 complete -c forge -n '__fish_seen_subcommand_from zsh' -a '(__forge_complete_zsh_commands)'
 complete -c forge -n '__fish_seen_subcommand_from commit' -s p -l preview -d 'Preview the commit message without creating it'

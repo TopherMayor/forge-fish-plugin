@@ -157,16 +157,80 @@ if status --is-interactive
             return 1
         end
 
-        set -l fzf_args --delimiter='\s\s+' --prompt='Provider ❯ ' --with-nth='1,3..'
+        set -l current_provider_id (__forge_provider_id_from_text "$current_provider")
+        set -l fzf_args --delimiter='\s\s+' --prompt='Provider ❯ ' --with-nth='1,2,3,4'
         if test -n "$query"
             set fzf_args $fzf_args --query="$query"
         end
-        if test -n "$current_provider"
-            set -l index (__forge_find_index "$output" "$current_provider" 1)
+        if test -n "$current_provider_id"
+            set -l index (__forge_find_index "$output" "$current_provider_id" 2)
             set fzf_args $fzf_args --bind="start:pos($index)"
         end
 
         printf '%s\n' $output | __forge_fzf --header-lines=1 $fzf_args
+    end
+
+    function __forge_provider_row_fields --argument-names line
+        set -l normalized (string replace -ar '\s{2,}' '\t' -- (string trim -- $line))
+        string split \t -- $normalized
+    end
+
+    function __forge_provider_id_from_text --argument-names provider_text
+        set provider_text (string trim -- $provider_text)
+        if test -z "$provider_text"
+            return 1
+        end
+
+        set -l fields (__forge_provider_row_fields "$provider_text")
+        if test (count $fields) -ge 2
+            set -l candidate (string trim -- $fields[2])
+            if test -n "$candidate"
+                echo $candidate
+                return 0
+            end
+        end
+
+        set -l output (command $_FORGE_BIN list provider --porcelain 2>/dev/null)
+        if test -z "$output"
+            return 1
+        end
+
+        for line in (string split \n -- $output)
+            if test -z "$line"
+                continue
+            end
+
+            if string match -rq '^NAME[[:space:]]+ID[[:space:]]+HOST[[:space:]]+LOGGED IN$' -- $line
+                continue
+            end
+
+            set -l row (__forge_provider_row_fields "$line")
+            if test (count $row) -lt 2
+                continue
+            end
+
+            if test "$row[1]" = "$provider_text"; or test "$row[2]" = "$provider_text"
+                echo $row[2]
+                return 0
+            end
+        end
+
+        return 1
+    end
+
+    function __forge_provider_login_target_from_text --argument-names provider_text
+        set provider_text (string trim -- $provider_text)
+        if test -z "$provider_text"
+            return 1
+        end
+
+        set -l provider_id (__forge_provider_id_from_text "$provider_text")
+        if test -n "$provider_id"
+            echo $provider_id
+            return 0
+        end
+
+        echo $provider_text
     end
 
     function __forge_pick_agent --argument-names query current_agent
@@ -607,30 +671,37 @@ if status --is-interactive
     end
 
     function __forge_action_provider_login --argument-names input_text
+        set input_text (string trim -- $input_text)
         if test -z "$input_text"
             set -l selected (__forge_pick_provider '' '')
             if test -n "$selected"
-                set input_text (string split -m 1 '  ' -- $selected)[1]
+                set input_text (__forge_provider_id_from_text $selected)
             end
+        else
+            set input_text (__forge_provider_id_from_text $input_text)
         end
+
         if test -n "$input_text"
             command $_FORGE_BIN provider login $input_text
         end
     end
 
     function __forge_action_logout --argument-names input_text
+        set input_text (string trim -- $input_text)
         if test -z "$input_text"
             set -l selected (__forge_pick_provider '\[yes\]' '')
             if test -n "$selected"
-                set input_text (string split -m 1 '  ' -- $selected)[1]
+                set input_text (__forge_provider_id_from_text $selected)
             end
+        else
+            set input_text (__forge_provider_id_from_text $input_text)
         end
+
         if test -n "$input_text"
             command $_FORGE_BIN provider logout $input_text
         end
     end
 
-    function __forge_action_default --argument-names user_action input_text
     function __forge_action_default --argument-names user_action input_text
         if test -n "$user_action"
             set -l command_type (__forge_command_type $user_action)
@@ -669,7 +740,6 @@ if status --is-interactive
 
         command $_FORGE_BIN --conversation-id "$_FORGE_CONVERSATION_ID" --prompt "$input_text"
     end
-
     function __forge_dispatch_line --argument-names line
         set -l trimmed (string trim -- $line)
         if not string match -rq '^:' -- $trimmed
