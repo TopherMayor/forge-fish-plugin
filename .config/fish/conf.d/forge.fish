@@ -3,12 +3,12 @@
 
 if status --is-interactive
     set -q _FORGE_BIN; or set -g _FORGE_BIN forge
-    set -q _FORGE_ACTIVE_AGENT; or set -g _FORGE_ACTIVE_AGENT forge
-    set -q _FORGE_CONVERSATION_ID; or set -g _FORGE_CONVERSATION_ID ""
-    set -q _FORGE_PREVIOUS_CONVERSATION_ID; or set -g _FORGE_PREVIOUS_CONVERSATION_ID ""
-    set -q _FORGE_SESSION_MODEL; or set -g _FORGE_SESSION_MODEL ""
-    set -q _FORGE_SESSION_PROVIDER; or set -g _FORGE_SESSION_PROVIDER ""
-    set -q _FORGE_SESSION_REASONING_EFFORT; or set -g _FORGE_SESSION_REASONING_EFFORT ""
+    set -q _FORGE_ACTIVE_AGENT; or set -U _FORGE_ACTIVE_AGENT forge
+    set -q _FORGE_CONVERSATION_ID; or set -U _FORGE_CONVERSATION_ID ""
+    set -q _FORGE_PREVIOUS_CONVERSATION_ID; or set -U _FORGE_PREVIOUS_CONVERSATION_ID ""
+    set -q _FORGE_SESSION_MODEL; or set -U _FORGE_SESSION_MODEL ""
+    set -q _FORGE_SESSION_PROVIDER; or set -U _FORGE_SESSION_PROVIDER ""
+    set -q _FORGE_SESSION_REASONING_EFFORT; or set -U _FORGE_SESSION_REASONING_EFFORT ""
     set -q _FORGE_MAX_COMMIT_DIFF; or set -g _FORGE_MAX_COMMIT_DIFF 100000
     set -q _FORGE_PREVIEW_WINDOW; or set -g _FORGE_PREVIEW_WINDOW --preview-window=bottom:75%:wrap:border-sharp
 
@@ -255,12 +255,12 @@ if status --is-interactive
     end
 
     function __forge_action_new --argument-names input_text
-        set -e _FORGE_CONVERSATION_ID
-        set -g _FORGE_PREVIOUS_CONVERSATION_ID ""
+        set -e -U _FORGE_CONVERSATION_ID
+        set -U _FORGE_PREVIOUS_CONVERSATION_ID ""
         if test -n "$input_text"
             set -l new_id (command $_FORGE_BIN conversation new 2>/dev/null)
             if test -n "$new_id"
-                set -g _FORGE_CONVERSATION_ID $new_id
+                set -U _FORGE_CONVERSATION_ID $new_id
                 command $_FORGE_BIN --conversation-id "$new_id" --prompt "$input_text"
             else
                 command $_FORGE_BIN --prompt "$input_text"
@@ -294,8 +294,8 @@ if status --is-interactive
             return 0
         end
 
-        set -g _FORGE_PREVIOUS_CONVERSATION_ID $_FORGE_CONVERSATION_ID
-        set -g _FORGE_CONVERSATION_ID $input_text
+        set -U _FORGE_PREVIOUS_CONVERSATION_ID $_FORGE_CONVERSATION_ID
+        set -U _FORGE_CONVERSATION_ID $input_text
         command $_FORGE_BIN conversation show "$input_text"
         command $_FORGE_BIN conversation info "$input_text"
     end
@@ -315,8 +315,8 @@ if status --is-interactive
         set -l clone_output (command $_FORGE_BIN conversation clone "$input_text" 2>&1)
         set -l new_id (string match -r '[a-f0-9-]{36}' -- $clone_output)
         if test (count $new_id) -gt 0
-            set -g _FORGE_PREVIOUS_CONVERSATION_ID $_FORGE_CONVERSATION_ID
-            set -g _FORGE_CONVERSATION_ID $new_id[1]
+            set -U _FORGE_PREVIOUS_CONVERSATION_ID $_FORGE_CONVERSATION_ID
+            set -U _FORGE_CONVERSATION_ID $new_id[1]
             command $_FORGE_BIN conversation show $_FORGE_CONVERSATION_ID
             command $_FORGE_BIN conversation info $_FORGE_CONVERSATION_ID
         else
@@ -414,9 +414,9 @@ if status --is-interactive
     end
 
     function __forge_action_config_reload
-        set -e _FORGE_SESSION_MODEL
-        set -e _FORGE_SESSION_PROVIDER
-        set -e _FORGE_SESSION_REASONING_EFFORT
+        set -e -U _FORGE_SESSION_MODEL
+        set -e -U _FORGE_SESSION_PROVIDER
+        set -e -U _FORGE_SESSION_REASONING_EFFORT
     end
 
     function __forge_action_model --argument-names input_text
@@ -427,14 +427,14 @@ if status --is-interactive
             if test -n "$selected"
                 set -l fields (string split -m 3 '  ' -- $selected)
                 if test (count $fields) -ge 4
-                    set -g _FORGE_SESSION_MODEL (string trim -- $fields[1])
-                    set -g _FORGE_SESSION_PROVIDER (string trim -- $fields[4])
+                    set -U _FORGE_SESSION_MODEL (string trim -- $fields[1])
+                    set -U _FORGE_SESSION_PROVIDER (string trim -- $fields[4])
                 end
             end
             return 0
         end
 
-        set -g _FORGE_SESSION_MODEL $input_text
+        set -U _FORGE_SESSION_MODEL $input_text
     end
 
     function __forge_action_config_model --argument-names input_text
@@ -493,12 +493,12 @@ if status --is-interactive
             set -l efforts none minimal low medium high xhigh max
             set -l selected (printf 'EFFORT\n%s\n' $efforts | __forge_fzf --header-lines=1 --prompt='Reasoning Effort ❯ ')
             if test -n "$selected"
-                set -g _FORGE_SESSION_REASONING_EFFORT $selected
+                set -U _FORGE_SESSION_REASONING_EFFORT $selected
             end
             return 0
         end
 
-        set -g _FORGE_SESSION_REASONING_EFFORT $input_text
+        set -U _FORGE_SESSION_REASONING_EFFORT $input_text
     end
 
     function __forge_action_config_reasoning_effort --argument-names input_text
@@ -616,7 +616,7 @@ if status --is-interactive
                     set user_action muse
                 end
                 if test "$user_action" = agent
-                    set -g _FORGE_ACTIVE_AGENT forge
+                    set -U _FORGE_ACTIVE_AGENT forge
                 end
             end
             return 0
@@ -625,11 +625,11 @@ if status --is-interactive
         if test -z "$_FORGE_CONVERSATION_ID"
             set -l new_id (command $_FORGE_BIN conversation new 2>/dev/null)
             if test -n "$new_id"
-                set -g _FORGE_CONVERSATION_ID $new_id
+                set -U _FORGE_CONVERSATION_ID $new_id
             end
         end
         if test -n "$user_action"
-            set -g _FORGE_ACTIVE_AGENT $user_action
+            set -U _FORGE_ACTIVE_AGENT $user_action
         end
         command $_FORGE_BIN --conversation-id "$_FORGE_CONVERSATION_ID" --prompt "$input_text"
     end
