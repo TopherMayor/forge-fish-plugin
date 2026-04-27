@@ -61,13 +61,13 @@ The fish plugin is **functionally close** to the native zsh plugin, but it is **
 | Command dispatch | Uses `:` commands in the fish command line, and inserts a leading newline before Forge output | Uses zsh editor hooks and line-editing behavior | High functional overlap |
 | Selectors | Provides fish pickers for conversations, models, providers, and agents | Uses native zsh selection helpers | Similar workflow |
 | Key bindings | Binds Enter, Tab, and Ctrl-V for Forge actions | Uses `zle`-based bindings | Same intent, different editor model |
-| Completions | Fish completions for top-level commands and key flags | Rich generated completion tree in zsh | Fish is lighter |
+| Fish completions | Fish completions for top-level commands, help targets, zsh helpers, and key flags | Rich generated completion tree in zsh | Fish is lighter |
 
 ### Current missing parity
 
 | Missing or partial parity | What is different | Impact |
 | --- | --- | --- |
-| Completion depth | Fish completions are narrower than the zsh plugin’s generated completion tree | Fewer nested subcommand suggestions |
+| Completion depth | Fish completions now cover more root commands, zsh helpers, and key flags, but still do not match the zsh plugin’s generated tree | Fewer nested subcommand suggestions |
 | Exact theme fidelity | Fish has its own right prompt formatting instead of the zsh `RPROMPT` theme path | Visual output differs |
 | Editor integration | Fish uses `commandline`/bind handlers instead of zsh `zle` workflows | Same goal, different mechanics |
 | Native zsh-only behavior | Some zsh plugin internals are shell-specific and not directly portable | Not a literal 1:1 port |
