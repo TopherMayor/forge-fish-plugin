@@ -1,6 +1,77 @@
 # Forge Fish Plugin
 
-Forge's fish integration for prompt dispatch, command helpers, pickers, completions, and session persistence.
+Forge's fish integration for prompt dispatch, command helpers, pickers, completions, and session persistence. This project is intended to sit alongside the upstream Forge plugin.
+
+## Quick start
+
+### Prerequisites
+
+Before running the setup script, make sure:
+
+- `fish` is installed and available in your `PATH`
+- you have cloned this repository locally
+- you can write to the target Fish config root (default: `~/.config/fish/`)
+- `forge` itself is installed if you want to use the plugin immediately after setup
+
+### Setup
+
+From the plugin repo, run:
+
+```fish
+./setup.fish
+```
+
+This installs the fish integration into:
+
+- `~/.config/fish/conf.d/forge.fish`
+- `~/.config/fish/completions/forge.fish`
+
+Setup options:
+
+- `--copy` copies the files instead of symlinking them
+- `--force` replaces existing destination files without keeping backups
+- `--dry-run` previews the actions without changing anything
+- `--target-dir PATH` installs into an alternate Fish config root
+
+Example:
+
+```fish
+./setup.fish --dry-run --target-dir /tmp/fish-config
+```
+
+### Usage
+
+Start a new fish shell, then use Forge normally:
+
+```fish
+forge
+forge info
+forge zsh plugin
+```
+
+Prompt commands can be entered directly into the fish command line, for example:
+
+```fish
+:help
+:new
+:agent
+:forge
+:conversation
+:model
+:provider-login
+:logout
+:commit
+```
+
+Provider login/logout commands accept either a provider name or provider ID, but interactive selection always resolves to the provider's canonical ID before login/logout runs.
+
+Provider-related completions also expose provider IDs so the command line stays aligned with the Forge backend's identifier model.
+
+### How it loads
+
+Fish automatically loads files in `~/.config/fish/conf.d/`, so the plugin activates at shell startup without manual sourcing.
+
+The completion file at `~/.config/fish/completions/forge.fish` is also loaded automatically by fish.
 
 ## At a glance
 
@@ -44,17 +115,11 @@ Forge's fish integration for prompt dispatch, command helpers, pickers, completi
 - Workspace helpers
 - Commit and suggestion helpers
 - Session state persists across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent
-- Provider login/logout picker selections resolve to Forge provider IDs, so the fish plugin uses the same canonical identifier whether you choose a provider by name or ID
-
-## How it loads
-
-Fish automatically loads files in `~/.config/fish/conf.d/`, so the plugin activates at shell startup without manual sourcing.
-
-The completion file at `~/.config/fish/completions/forge.fish` is also loaded automatically by fish.
+- Provider login/logout picker selections resolve to Forge provider IDs, so the fish plugin uses the same identifier whether you choose a provider by name or ID
 
 ## Feature parity with the native zsh plugin
 
-The fish plugin is functionally close to the native zsh plugin, but it is not 1:1.
+The fish plugin is functionally close to the native zsh plugin, while remaining a separate fish-native integration.
 
 ### Usage comparison
 
@@ -94,69 +159,14 @@ The biggest editor gaps are:
 - fish can submit and rewrite lines, but it does not share zsh’s editor model
 - picker cancellations and cursor restoration can still feel less integrated than zsh
 
-## Usage
+## Upstream references
 
-Start a new fish shell, then use Forge normally:
+This project sits alongside the upstream Forge project and its native zsh shell plugin.
 
-```fish
-forge
-forge info
-forge zsh plugin
-```
+- Original Forge repository: https://github.com/tailcallhq/forgecode
+- Native zsh shell plugin: https://github.com/tailcallhq/forgecode/tree/main/shell-plugin
 
-Prompt commands can be entered directly into the fish command line, for example:
-
-```fish
-:help
-:new
-:agent
-:forge
-:conversation
-:model
-:provider-login
-:logout
-:commit
-```
-
-Provider login/logout commands accept either a provider name or provider ID, but interactive selection always resolves to the provider's canonical ID before login/logout runs.
-
-Provider-related completions also expose provider IDs so the command line stays aligned with the Forge backend's canonical identifier.
-
-## Prerequisites
-
-Before running the setup script, make sure:
-
-- `fish` is installed and available in your `PATH`
-- you have cloned this repository locally
-- you can write to the target Fish config root (default: `~/.config/fish/`)
-- `forge` itself is installed if you want to use the plugin immediately after setup
-
-
-## How to set it up
-
-From the plugin repo, run:
-
-```fish
-./setup.fish
-```
-
-This installs the fish integration into:
-
-- `~/.config/fish/conf.d/forge.fish`
-- `~/.config/fish/completions/forge.fish`
-
-### Setup options
-
-- `--copy` copies the files instead of symlinking them
-- `--force` replaces existing destination files without keeping backups
-- `--dry-run` previews the actions without changing anything
-- `--target-dir PATH` installs into an alternate Fish config root
-
-Example:
-
-```fish
-./setup.fish --dry-run --target-dir /tmp/fish-config
-```
+Use the upstream Forge repository as a reference for Forge behavior, and the shell-plugin directory as a reference for the zsh implementation details that inform this fish integration.
 
 ## Files
 
@@ -190,4 +200,3 @@ Relevant behavior in the fish integration:
 - session restoration: `.config/fish/conf.d/forge.fish:4-13`, `.config/fish/conf.d/forge.fish:336-395`, `.config/fish/conf.d/forge.fish:520-609`
 - prompt dispatch: `.config/fish/conf.d/forge.fish:743-829`
 - fish completions: `.config/fish/completions/forge.fish:1-101`
-
