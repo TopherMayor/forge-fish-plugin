@@ -108,6 +108,9 @@ The completion file at `~/.config/fish/completions/forge.fish` is also loaded au
   - switch
   - clone
   - rename
+  - delete
+  - resume
+  - stats
   - copy
   - dump
   - compact
@@ -115,7 +118,7 @@ The completion file at `~/.config/fish/completions/forge.fish` is also loaded au
 - Model and provider pickers
 - Configuration helpers for model, commit model, suggest model, and reasoning effort
 - Workspace helpers
-- Commit and suggestion helpers
+- Commit, suggestion, logs, update, MCP, custom-command, and VS Code helpers
 - Session state persists across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent
 - Provider login/logout picker selections resolve to Forge provider IDs, so the fish plugin uses the same identifier whether you choose a provider by name or ID
 
@@ -132,11 +135,16 @@ The fish plugin is functionally close to the native zsh plugin, while remaining 
 | `:info` / `:help` | Dispatches to Forge info/help flows | Same conceptual commands exist | **Supported** |
 | `:agent` | Opens a picker and updates the active agent | Native agent selection helpers | **Supported** |
 | Bare agent commands | `:forge`, `:muse`, `:sage`, and similar agent switches work directly | Agent-style prompt commands are available upstream | **Supported** |
-| `:conversation` | Switch, clone, rename, copy, dump, and retry workflows exist | Same general conversation workflow | **Supported** |
+| `:conversation` | Switch, clone, rename, copy, dump, compact, retry, resume, stats, and delete workflows exist | Same general conversation workflow | **Supported** |
 | `:model` / `:config-model` | Model picker and model config helpers exist | Upstream has model selection/config helpers | **Supported** |
 | `:reasoning-effort` | Reasoning effort picker/config exists | Upstream has session/config controls | **Supported** |
 | `:provider-login` / `:logout` | Provider login/logout resolves canonical provider IDs | Upstream uses provider selection/login flows | **Supported** |
-| Workspace commands | `:workspace-sync`, `:workspace-init`, `:workspace-status`, `:workspace-info` are implemented | Upstream documents workspace-oriented commands | **Supported** |
+| `:logs` | Streams logs or forwards log flags to Forge | Upstream has log-streaming commands | **Supported** |
+| `:mcp` | Routes MCP subcommands such as list/import/remove/show/reload/login/logout | Upstream has MCP server management commands | **Supported** |
+| `:cmd` | Routes custom command list/execute flows | Upstream has custom command management | **Supported** |
+| `:update` | Forwards update flags such as `--no-confirm` | Upstream includes update workflows | **Supported** |
+| `:vscode` | Routes VS Code extension install helpers | Upstream includes editor integration commands | **Supported** |
+| Workspace commands | `:workspace-sync` / `:sync`, `:workspace-init`, `:workspace-status`, and `:workspace-info` are implemented | Upstream documents workspace-oriented commands | **Supported** |
 | Commit helpers | `:commit` and `:commit-preview` are implemented | Upstream includes commit-generation flow | **Supported** |
 | Suggestion helpers | `:suggest` exists | Upstream includes suggestion-style actions | **Supported** |
 | Configuration commands | `:config`, `:config-edit`, `:config-reload`, `:config-commit-model`, `:config-suggest-model`, and related config flows exist | Upstream has config management flows | **Supported** |
@@ -144,15 +152,14 @@ The fish plugin is functionally close to the native zsh plugin, while remaining 
 | Session continuity | Conversation, model, provider, reasoning effort, and active agent persist across fish shells via universal variables | Upstream keeps context within the current shell/plugin session | **Supported** for continuity, **Different** in implementation |
 | Prompt/status display | Fish right prompt shows Forge status, active agent, model, effort, and conversation id | Upstream uses shell-theme/RPROMPT styling | **Partial** |
 | Selectors | Fish provides pickers for conversations, models, providers, and agents | Upstream has native selection helpers | **Partial** |
-| Fish completions | Covers common root commands, help targets, provider commands, zsh helpers, and key flags | Upstream has a richer generated completion tree | **Partial** |
+| Fish completions | Covers root commands, help targets, conversation, provider, MCP, custom command, VS Code, zsh helpers, workspace helpers, and key flags | Upstream has a richer generated completion tree | **Partial** |
 | Key bindings | Enter, Tab, Ctrl-J, and Ctrl-V are bound for Forge actions | Upstream uses `zle`-based bindings | **Partial** |
-| File tagging `@[...]` | No dedicated fish UX for tagged file selection yet | Upstream documents interactive file tagging | **Missing** |
-| Syntax highlighting | Not implemented in the fish integration | Upstream provides visual feedback for commands and tags | **Missing** |
-| `:sync` / codebase indexing | Not present in the fish dispatcher/docs | Upstream documents codebase indexing | **Missing** |
-| `:doctor` diagnostics | Not present in the fish dispatcher/docs | Upstream documents environment diagnostics | **Missing** |
+| File tagging `@[...]` | Dedicated fish UX exists for tagged file selection and insertion | Upstream documents interactive file tagging | **Supported** |
+| Syntax highlighting | Lightweight live hints are shown for tags and workflow/command prefixes | Upstream provides richer visual feedback for commands and tags | **Partial** |
+| `:sync` / codebase indexing | Implemented in the fish dispatcher and documented in completions | Upstream documents codebase indexing | **Supported** |
+| `:doctor` diagnostics | Implemented in the fish dispatcher and supported by completions | Upstream documents environment diagnostics | **Supported** |
 | `zle`-native editor integration | Fish uses `commandline` and `bind` handlers | Upstream uses true ZLE widgets | **Missing by design** |
 
-### Completion needs
 
 The biggest completion gaps are:
 
@@ -177,17 +184,19 @@ The current fish plugin already supports the main day-to-day workflow:
 - submit prompt commands directly
 - use `:new` and `:agent`
 - switch conversations
+- resume, inspect stats, clone, rename, copy, dump, compact, and delete conversations
 - choose models and providers
 - use workspace helpers
+- manage logs, MCP servers, custom commands, updates, and VS Code extension installation
 - keep state across shell sessions
 - get common Forge completions
 
 These behaviors are reflected in the fish integration and README here:
 
-- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:743-829`
-- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:154-234`
-- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:336-609`
-- `repos/forge-fish-plugin/.config/fish/completions/forge.fish:1-101`
+- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:776-837`
+- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:971-1035`
+- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:316-334`
+- `repos/forge-fish-plugin/.config/fish/completions/forge.fish:1-157`
 
 ## Upstream references
 
@@ -228,5 +237,5 @@ Session state continues to persist across fish shells via universal variables, i
 Relevant behavior in the fish integration:
 - provider selection and login/logout canonicalization: `.config/fish/conf.d/forge.fish:154-234`, `.config/fish/conf.d/forge.fish:673-701`
 - session restoration: `.config/fish/conf.d/forge.fish:4-13`, `.config/fish/conf.d/forge.fish:336-395`, `.config/fish/conf.d/forge.fish:520-609`
-- prompt dispatch: `.config/fish/conf.d/forge.fish:743-829`
-- fish completions: `.config/fish/completions/forge.fish:1-101`
+- prompt dispatch: `.config/fish/conf.d/forge.fish:955-1035`
+- fish completions: `.config/fish/completions/forge.fish:1-157`
