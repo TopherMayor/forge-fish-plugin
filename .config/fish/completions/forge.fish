@@ -66,6 +66,14 @@ function __forge_complete_prompt_commands
     end
 end
 
+function __forge_complete_workspace_commands
+    printf '%s\t%s\n' sync 'Sync current workspace for semantic search'
+    printf '%s\t%s\n' init 'Initialize a new workspace without syncing files'
+    printf '%s\t%s\n' status 'Show sync status of all workspace files'
+    printf '%s\t%s\n' info 'Show workspace information with sync details'
+    printf '%s\t%s\n' help 'Print this message or the help of the given subcommand(s)'
+end
+
 function __forge_complete_zsh_commands
     printf '%s\t%s\n' plugin 'Generate shell plugin script'
     printf '%s\t%s\n' theme 'Generate shell theme'
@@ -87,6 +95,8 @@ complete -c forge -n '__fish_seen_subcommand_from provider list' -l porcelain -d
 complete -c forge -n '__fish_seen_subcommand_from provider' -l porcelain -d 'Output in machine-readable format'
 complete -c forge -n '__fish_seen_subcommand_from zsh help' -a '(__forge_complete_zsh_commands)'
 complete -c forge -n '__fish_seen_subcommand_from zsh' -a '(__forge_complete_zsh_commands)'
+complete -c forge -n '__fish_seen_subcommand_from workspace help' -a '(__forge_complete_workspace_commands)'
+complete -c forge -n '__fish_seen_subcommand_from workspace' -a '(__forge_complete_workspace_commands)'
 complete -c forge -n '__fish_seen_subcommand_from commit' -s p -l preview -d 'Preview the commit message without creating it'
 complete -c forge -n '__fish_seen_subcommand_from commit' -l max-diff -d 'Limit the diff size used for commit generation' -r
 complete -c forge -n '__fish_seen_subcommand_from commit-preview' -l max-diff -d 'Limit the diff size used for commit generation' -r

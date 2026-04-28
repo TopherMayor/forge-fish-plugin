@@ -289,6 +289,11 @@ if status --is-interactive
         set -l segments
         set segments $segments (set_color brblack) '󱙺 FORGE' (set_color normal)
 
+        set -l live_hint (__forge_live_buffer_hint)
+        if test -n "$live_hint"
+            set segments $segments (set_color brblack) $live_hint (set_color normal)
+        end
+
         if test -n "$_FORGE_ACTIVE_AGENT"; and test "$_FORGE_ACTIVE_AGENT" != "forge"
             set segments $segments (set_color brblack) $_FORGE_ACTIVE_AGENT (set_color normal)
         end
@@ -306,6 +311,27 @@ if status --is-interactive
         end
 
         string join ' ' $segments
+    end
+
+    function __forge_live_buffer_hint
+        set -l buffer (commandline -b 2>/dev/null)
+        if test -z "$buffer"
+            return
+        end
+
+        if string match -rq '^:\s*(tag|file)\b' -- $buffer
+            echo (set_color bryellow)'tag' (set_color normal)
+            return
+        end
+
+        if string match -rq '^:\s*(sync|index|doctor)\b' -- $buffer
+            echo (set_color brcyan)'workflow' (set_color normal)
+            return
+        end
+
+        if string match -rq '@\[' -- $buffer
+            echo (set_color brmagenta)'@[...]' (set_color normal)
+        end
     end
 
     function fish_right_prompt --description 'Forge-aware right prompt'
@@ -330,6 +356,93 @@ if status --is-interactive
     function __forge_paste_and_format
         fish_clipboard_paste
         __forge_format_buffer
+        commandline -f repaint
+    end
+
+    function __forge_complete_action_names
+        printf '%s\n' \
+            help \
+            new \
+            info \
+            dump \
+            compact \
+            retry \
+            agent \
+            conversation \
+            conversation-rename \
+            clone \
+            rename \
+            copy \
+            model \
+            config-model \
+            config-reload \
+            reasoning-effort \
+            config-reasoning-effort \
+            config-commit-model \
+            config-suggest-model \
+            tools \
+            config \
+            config-edit \
+            skill \
+            edit \
+            commit \
+            commit-preview \
+            suggest \
+            workspace-sync \
+            sync \
+            workspace-init \
+            workspace-status \
+            workspace-info \
+            index \
+            doctor \
+            tag \
+            file
+    end
+
+    function __forge_file_tag_candidates
+        command $_FORGE_BIN list file --porcelain 2>/dev/null
+    end
+
+    function __forge_pick_file_tag --argument-names query current_file
+        set -l output (__forge_file_tag_candidates)
+        if test -z "$output"
+            return 1
+        end
+
+        set -l fzf_args --delimiter='\s\s+' --prompt='File Tag ❯ ' --with-nth='1..'
+        if test -n "$query"
+            set fzf_args $fzf_args --query="$query"
+        end
+        if test -n "$current_file"
+            set -l index (__forge_find_index "$output" "$current_file" 1)
+            set fzf_args $fzf_args --bind="start:pos($index)"
+        end
+
+        printf '%s\n' $output | __forge_fzf --header-lines=1 $fzf_args
+    end
+
+    function __forge_action_tag --argument-names input_text
+        set input_text (string trim -- $input_text)
+        if test -z "$input_text"
+            set -l selected (__forge_pick_file_tag '' '')
+            if test -n "$selected"
+                set input_text (string trim -- $selected)
+            end
+        end
+
+        if test -z "$input_text"
+            return 0
+        end
+
+        if string match -rq '^@\[[^]]+\]$' -- $input_text
+            set -l tag_text $input_text
+        else if string match -rq '^@\[' -- $input_text
+            set -l tag_text $input_text
+        else
+            set -l tag_text "@[$input_text]"
+        end
+
+        commandline -r "$tag_text"
         commandline -f repaint
     end
 
@@ -819,6 +932,12 @@ if status --is-interactive
                 __forge_action_workspace_status
             case workspace-info sync-info
                 __forge_action_workspace_info
+            case index
+                command $_FORGE_BIN index
+            case doctor
+                command $_FORGE_BIN doctor
+            case tag file
+                __forge_action_tag $input_text
             case provider-login login provider
                 __forge_action_provider_login $input_text
             case logout
