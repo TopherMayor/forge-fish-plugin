@@ -114,13 +114,53 @@ Prompt commands can be entered directly into the fish command line, for example:
 :conversation
 :model
 :provider-login
+:logout
 :commit
 ```
 
 Provider login/logout commands accept either a provider name or provider ID, but interactive selection always resolves to the provider's canonical ID before login/logout runs.
 
+Provider-related completions also expose provider IDs so the command line stays aligned with the Forge backend's canonical identifier.
+
+## Prerequisites
+
+Before running the setup script, make sure:
+
+- `fish` is installed and available in your `PATH`
+- you have cloned this repository locally
+- you can write to the target Fish config root (default: `~/.config/fish/`)
+- `forge` itself is installed if you want to use the plugin immediately after setup
+
+
+## How to set it up
+
+From the plugin repo, run:
+
+```fish
+./setup.fish
+```
+
+This installs the fish integration into:
+
+- `~/.config/fish/conf.d/forge.fish`
+- `~/.config/fish/completions/forge.fish`
+
+### Setup options
+
+- `--copy` copies the files instead of symlinking them
+- `--force` replaces existing destination files without keeping backups
+- `--dry-run` previews the actions without changing anything
+- `--target-dir PATH` installs into an alternate Fish config root
+
+Example:
+
+```fish
+./setup.fish --dry-run --target-dir /tmp/fish-config
+```
+
 ## Files
 
+- `setup.fish`
 - `~/.config/fish/conf.d/forge.fish`
 - `~/.config/fish/completions/forge.fish`
 
@@ -130,6 +170,11 @@ This repo contains the fish integration files only. It is intended to be a pract
 
 Forge responses appear on their own line so the command flow stays close to the zsh plugin’s editor-driven output separation.
 
-- `provider` commands complete with provider IDs so provider login/logout uses the correct Forge identifier
-- `provider login` and `provider logout` now resolve selected providers to IDs before invoking Forge
-- session state continues to persist across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent
+Session state continues to persist across fish shells via universal variables, including conversation, model, provider, reasoning effort, and active agent.
+
+Relevant behavior in the fish integration:
+- provider selection and login/logout canonicalization: `.config/fish/conf.d/forge.fish:154-234`, `.config/fish/conf.d/forge.fish:673-701`
+- session restoration: `.config/fish/conf.d/forge.fish:4-13`, `.config/fish/conf.d/forge.fish:336-395`, `.config/fish/conf.d/forge.fish:520-609`
+- prompt dispatch: `.config/fish/conf.d/forge.fish:743-829`
+- fish completions: `.config/fish/completions/forge.fish:1-101`
+
