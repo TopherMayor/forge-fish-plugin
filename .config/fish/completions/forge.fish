@@ -66,6 +66,44 @@ function __forge_complete_prompt_commands
     end
 end
 
+function __forge_complete_conversation_commands
+    printf '%s\t%s\n' list 'List conversation history'
+    printf '%s\t%s\n' new 'Create a new conversation'
+    printf '%s\t%s\n' dump 'Export conversation as JSON or HTML'
+    printf '%s\t%s\n' compact 'Compact conversation to reduce token usage'
+    printf '%s\t%s\n' retry 'Retry last command without modifying context'
+    printf '%s\t%s\n' resume 'Resume conversation in interactive mode'
+    printf '%s\t%s\n' show 'Show last assistant message'
+    printf '%s\t%s\n' info 'Show conversation details'
+    printf '%s\t%s\n' stats 'Show conversation statistics'
+    printf '%s\t%s\n' clone 'Clone conversation with a new ID'
+    printf '%s\t%s\n' delete 'Delete a conversation permanently'
+    printf '%s\t%s\n' rename 'Rename a conversation'
+    printf '%s\t%s\n' help 'Print this message or the help of the given subcommand(s)'
+end
+
+function __forge_complete_mcp_commands
+    printf '%s\t%s\n' import 'Import server configuration from JSON'
+    printf '%s\t%s\n' list 'List configured servers'
+    printf '%s\t%s\n' remove 'Remove a configured server'
+    printf '%s\t%s\n' show 'Show server configuration details'
+    printf '%s\t%s\n' reload 'Reload servers and rebuild caches'
+    printf '%s\t%s\n' login 'Authenticate with an OAuth-enabled MCP server'
+    printf '%s\t%s\n' logout 'Remove stored OAuth credentials for an MCP server'
+    printf '%s\t%s\n' help 'Print this message or the help of the given subcommand(s)'
+end
+
+function __forge_complete_cmd_commands
+    printf '%s\t%s\n' list 'List all available custom commands'
+    printf '%s\t%s\n' execute 'Execute a custom command'
+    printf '%s\t%s\n' help 'Print this message or the help of the given subcommand(s)'
+end
+
+function __forge_complete_vscode_commands
+    printf '%s\t%s\n' install-extension 'Install the Forge VS Code extension'
+    printf '%s\t%s\n' help 'Print this message or the help of the given subcommand(s)'
+end
+
 function __forge_complete_workspace_commands
     printf '%s\t%s\n' sync 'Sync current workspace for semantic search'
     printf '%s\t%s\n' init 'Initialize a new workspace without syncing files'
@@ -95,6 +133,14 @@ complete -c forge -n '__fish_seen_subcommand_from provider list' -l porcelain -d
 complete -c forge -n '__fish_seen_subcommand_from provider' -l porcelain -d 'Output in machine-readable format'
 complete -c forge -n '__fish_seen_subcommand_from zsh help' -a '(__forge_complete_zsh_commands)'
 complete -c forge -n '__fish_seen_subcommand_from zsh' -a '(__forge_complete_zsh_commands)'
+complete -c forge -n '__fish_seen_subcommand_from conversation help' -a '(__forge_complete_conversation_commands)'
+complete -c forge -n '__fish_seen_subcommand_from conversation' -a '(__forge_complete_conversation_commands)'
+complete -c forge -n '__fish_seen_subcommand_from mcp help' -a '(__forge_complete_mcp_commands)'
+complete -c forge -n '__fish_seen_subcommand_from mcp' -a '(__forge_complete_mcp_commands)'
+complete -c forge -n '__fish_seen_subcommand_from cmd help' -a '(__forge_complete_cmd_commands)'
+complete -c forge -n '__fish_seen_subcommand_from cmd' -a '(__forge_complete_cmd_commands)'
+complete -c forge -n '__fish_seen_subcommand_from vscode help' -a '(__forge_complete_vscode_commands)'
+complete -c forge -n '__fish_seen_subcommand_from vscode' -a '(__forge_complete_vscode_commands)'
 complete -c forge -n '__fish_seen_subcommand_from workspace help' -a '(__forge_complete_workspace_commands)'
 complete -c forge -n '__fish_seen_subcommand_from workspace' -a '(__forge_complete_workspace_commands)'
 complete -c forge -n '__fish_seen_subcommand_from commit' -s p -l preview -d 'Preview the commit message without creating it'

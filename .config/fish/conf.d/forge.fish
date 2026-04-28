@@ -319,8 +319,8 @@ if status --is-interactive
             return
         end
 
-        if string match -rq '^:\s*(tag|file)\b' -- $buffer
-            echo (set_color bryellow)'tag' (set_color normal)
+        if string match -rq '^:\s*(tag|file|delete|logs|mcp|cmd|vscode|update)\b' -- $buffer
+            echo (set_color bryellow)'command' (set_color normal)
             return
         end
 
@@ -367,6 +367,12 @@ if status --is-interactive
             dump \
             compact \
             retry \
+            delete \
+            logs \
+            mcp \
+            cmd \
+            update \
+            vscode \
             agent \
             conversation \
             conversation-rename \
@@ -767,6 +773,99 @@ if status --is-interactive
         command $_FORGE_BIN conversation retry $_FORGE_CONVERSATION_ID
     end
 
+    function __forge_action_resume --argument-names input_text
+        if test -z "$input_text"
+            set -l selected (__forge_pick_conversation)
+            if test -n "$selected"
+                set input_text (string split -m 1 '  ' -- $selected)[1]
+            else if test -n "$_FORGE_CONVERSATION_ID"
+                set input_text $_FORGE_CONVERSATION_ID
+            end
+        end
+
+        if test -n "$input_text"
+            command $_FORGE_BIN conversation resume $input_text
+        end
+    end
+
+    function __forge_action_stats --argument-names input_text
+        if test -z "$input_text"
+            set -l selected (__forge_pick_conversation)
+            if test -n "$selected"
+                set input_text (string split -m 1 '  ' -- $selected)[1]
+            else if test -n "$_FORGE_CONVERSATION_ID"
+                set input_text $_FORGE_CONVERSATION_ID
+            end
+        end
+
+        if test -n "$input_text"
+            command $_FORGE_BIN conversation stats $input_text
+        end
+    end
+
+    function __forge_action_delete --argument-names input_text
+        if test -z "$input_text"
+            set -l selected (__forge_pick_conversation)
+            if test -n "$selected"
+                set input_text (string split -m 1 '  ' -- $selected)[1]
+            else if test -n "$_FORGE_CONVERSATION_ID"
+                set input_text $_FORGE_CONVERSATION_ID
+            end
+        end
+
+        if test -n "$input_text"
+            command $_FORGE_BIN conversation delete $input_text
+        end
+    end
+
+    function __forge_action_logs --argument-names input_text
+        if test -n "$input_text"
+            set -l args (string split ' ' -- $input_text)
+            command $_FORGE_BIN logs $args
+        else
+            command $_FORGE_BIN logs
+        end
+    end
+
+    function __forge_action_mcp --argument-names input_text
+        if test -z "$input_text"
+            command $_FORGE_BIN mcp list
+            return 0
+        end
+
+        set -l args (string split ' ' -- $input_text)
+        command $_FORGE_BIN mcp $args
+    end
+
+    function __forge_action_cmd --argument-names input_text
+        if test -z "$input_text"
+            command $_FORGE_BIN cmd list
+            return 0
+        end
+
+        set -l args (string split ' ' -- $input_text)
+        command $_FORGE_BIN cmd $args
+    end
+
+    function __forge_action_update --argument-names input_text
+        if test -n "$input_text"
+            set -l args (string split ' ' -- $input_text)
+            command $_FORGE_BIN update $args
+        else
+            command $_FORGE_BIN update
+        end
+    end
+
+    function __forge_action_vscode --argument-names input_text
+        if test -z "$input_text"
+            command $_FORGE_BIN vscode install-extension
+            return 0
+        end
+
+        set -l args (string split ' ' -- $input_text)
+        command $_FORGE_BIN vscode $args
+    end
+
     function __forge_action_workspace_sync
         command $_FORGE_BIN workspace sync --init
     end
@@ -882,6 +981,10 @@ if status --is-interactive
                 __forge_action_compact
             case retry r
                 __forge_action_retry
+            case resume
+                __forge_action_resume $input_text
+            case stats
+                __forge_action_stats $input_text
             case agent a
                 __forge_action_agent $input_text
             case conversation c
@@ -922,6 +1025,18 @@ if status --is-interactive
                 __forge_action_rename $input_text
             case conversation-rename
                 __forge_action_conversation_rename $input_text
+            case delete
+                __forge_action_delete $input_text
+            case logs
+                __forge_action_logs $input_text
+            case mcp
+                __forge_action_mcp $input_text
+            case cmd
+                __forge_action_cmd $input_text
+            case update
+                __forge_action_update $input_text
+            case vscode
+                __forge_action_vscode $input_text
             case copy
                 __forge_action_copy
             case workspace-sync sync
