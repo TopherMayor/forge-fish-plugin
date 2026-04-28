@@ -1,6 +1,6 @@
 # Forge Fish Plugin
 
-Forge's fish integration for prompt dispatch, command helpers, pickers, completions, and session persistence. This project is intended to sit alongside the upstream Forge plugin.
+Forge's fish integration for prompt dispatch, command helpers, pickers, completions, and session persistence. This project is an independent, unaffiliated project that sits alongside the Forge project.
 
 ## Quick start
 
@@ -48,6 +48,8 @@ forge
 forge info
 forge zsh plugin
 ```
+
+That `forge zsh plugin` command comes from Forge itself; it prints the zsh shell-plugin integration script, which the native zsh setup typically evals inside `.zshrc`.
 
 Prompt commands can be entered directly into the fish command line, for example:
 
@@ -121,28 +123,36 @@ The completion file at `~/.config/fish/completions/forge.fish` is also loaded au
 
 The fish plugin is functionally close to the native zsh plugin, while remaining a separate fish-native integration.
 
-### Usage comparison
+### Parity matrix
 
 | Area | Fish plugin | Native zsh plugin | Status |
-| --- | --- | --- | --- |
-| Startup/loading | Auto-loads through `~/.config/fish/conf.d/forge.fish` and restores universal session state | Loaded through `eval "$(forge zsh plugin)"` and `eval "$(forge zsh theme)"` in `.zshrc` | Different shell-native plumbing |
-| Prompt/status | Fish right prompt shows Forge status, active agent, model, effort, and conversation id | zsh theme sets `RPROMPT` with Forge status | Similar intent, different implementation; fish also starts responses on a fresh line |
-| Command dispatch | Uses `:` commands in the fish command line, and inserts a leading newline before Forge output | Uses zsh editor hooks and line-editing behavior | High functional overlap |
-| Selectors | Provides fish pickers for conversations, models, providers, and agents | Uses native zsh selection helpers | Similar workflow |
-| Key bindings | Binds Enter, Tab, and Ctrl-V for Forge actions | Uses `zle`-based bindings | Same intent, different editor model |
-| Providers | Provider picker returns provider IDs, so `:provider-login` and `:logout` use the correct Forge identifier | Provider selection is id-based in zsh too | Same target, fish now avoids name/id mismatches |
-| Fish completions | Fish completions for top-level commands, help targets, provider commands, zsh helpers, and key flags | Rich generated completion tree in zsh | Fish is lighter |
-| Session restoration | Fish restores conversation, model, provider, reasoning effort, and active agent from universal variables | zsh keeps session state within the current shell/plugin context | Fish is persistent across shells |
+|---|---|---|---|
+| Prompt-command dispatch | `:` commands are parsed and routed in the fish dispatcher | zsh uses editor widgets and shell-line transformation | **Supported** for the core workflow, **Partial** for mechanics |
+| `:new` | Starts a fresh conversation and resets active agent | Same user-facing behavior | **Supported** |
+| `:info` / `:help` | Dispatches to Forge info/help flows | Same conceptual commands exist | **Supported** |
+| `:agent` | Opens a picker and updates the active agent | Native agent selection helpers | **Supported** |
+| Bare agent commands | `:forge`, `:muse`, `:sage`, and similar agent switches work directly | Agent-style prompt commands are available upstream | **Supported** |
+| `:conversation` | Switch, clone, rename, copy, dump, and retry workflows exist | Same general conversation workflow | **Supported** |
+| `:model` / `:config-model` | Model picker and model config helpers exist | Upstream has model selection/config helpers | **Supported** |
+| `:reasoning-effort` | Reasoning effort picker/config exists | Upstream has session/config controls | **Supported** |
+| `:provider-login` / `:logout` | Provider login/logout resolves canonical provider IDs | Upstream uses provider selection/login flows | **Supported** |
+| Workspace commands | `:workspace-sync`, `:workspace-init`, `:workspace-status`, `:workspace-info` are implemented | Upstream documents workspace-oriented commands | **Supported** |
+| Commit helpers | `:commit` and `:commit-preview` are implemented | Upstream includes commit-generation flow | **Supported** |
+| Suggestion helpers | `:suggest` exists | Upstream includes suggestion-style actions | **Supported** |
+| Configuration commands | `:config`, `:config-edit`, `:config-reload`, `:config-commit-model`, `:config-suggest-model`, and related config flows exist | Upstream has config management flows | **Supported** |
+| `:skill` / `:tools` | Present in the fish dispatcher | Upstream has tool/workflow-oriented commands | **Supported** |
+| Session continuity | Conversation, model, provider, reasoning effort, and active agent persist across fish shells via universal variables | Upstream keeps context within the current shell/plugin session | **Supported** for continuity, **Different** in implementation |
+| Prompt/status display | Fish right prompt shows Forge status, active agent, model, effort, and conversation id | Upstream uses shell-theme/RPROMPT styling | **Partial** |
+| Selectors | Fish provides pickers for conversations, models, providers, and agents | Upstream has native selection helpers | **Partial** |
+| Fish completions | Covers common root commands, help targets, provider commands, zsh helpers, and key flags | Upstream has a richer generated completion tree | **Partial** |
+| Key bindings | Enter, Tab, Ctrl-J, and Ctrl-V are bound for Forge actions | Upstream uses `zle`-based bindings | **Partial** |
+| File tagging `@[...]` | No dedicated fish UX for tagged file selection yet | Upstream documents interactive file tagging | **Missing** |
+| Syntax highlighting | Not implemented in the fish integration | Upstream provides visual feedback for commands and tags | **Missing** |
+| `:sync` / codebase indexing | Not present in the fish dispatcher/docs | Upstream documents codebase indexing | **Missing** |
+| `:doctor` diagnostics | Not present in the fish dispatcher/docs | Upstream documents environment diagnostics | **Missing** |
+| `zle`-native editor integration | Fish uses `commandline` and `bind` handlers | Upstream uses true ZLE widgets | **Missing by design** |
 
-### Current missing parity
-
-| Missing or partial parity | What is different | Impact |
-| --- | --- | --- |
-| Completion depth | Fish completions cover the common root commands, help targets, provider commands, zsh helpers, and key flags, but still do not match the zsh plugin’s generated tree | Fewer nested subcommand suggestions |
-| Editor integration | Fish uses `commandline`/bind handlers instead of zsh `zle` workflows | Same goal, different mechanics |
-| Native zsh-only behavior | Some zsh plugin internals are shell-specific and not directly portable | Not a literal 1:1 port |
-
-### Completion details
+### Completion needs
 
 The biggest completion gaps are:
 
@@ -151,7 +161,7 @@ The biggest completion gaps are:
 - value completion for model, provider, conversation, and agent arguments
 - more exhaustive `forge zsh` helper coverage
 
-### Editor details
+### Editor needs
 
 The biggest editor gaps are:
 
@@ -159,14 +169,34 @@ The biggest editor gaps are:
 - fish can submit and rewrite lines, but it does not share zsh’s editor model
 - picker cancellations and cursor restoration can still feel less integrated than zsh
 
+### What users can do now
+
+The current fish plugin already supports the main day-to-day workflow:
+
+- start Forge
+- submit prompt commands directly
+- use `:new` and `:agent`
+- switch conversations
+- choose models and providers
+- use workspace helpers
+- keep state across shell sessions
+- get common Forge completions
+
+These behaviors are reflected in the fish integration and README here:
+
+- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:743-829`
+- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:154-234`
+- `repos/forge-fish-plugin/.config/fish/conf.d/forge.fish:336-609`
+- `repos/forge-fish-plugin/.config/fish/completions/forge.fish:1-101`
+
 ## Upstream references
 
-This project sits alongside the upstream Forge project and its native zsh shell plugin.
+This project is an independent, unaffiliated integration that sits alongside the Forge project and its native zsh shell plugin.
 
 - Original Forge repository: https://github.com/tailcallhq/forgecode
 - Native zsh shell plugin: https://github.com/tailcallhq/forgecode/tree/main/shell-plugin
 
-Use the upstream Forge repository as a reference for Forge behavior, and the shell-plugin directory as a reference for the zsh implementation details that inform this fish integration.
+Use the Forge repository as a reference for Forge behavior, and the shell-plugin directory as a reference for the zsh implementation details that inform this fish integration.
 
 ## Files
 
@@ -180,7 +210,7 @@ Use the upstream Forge repository as a reference for Forge behavior, and the she
 - `.github/ISSUE_TEMPLATE/bug_report.yml`
 - `.github/ISSUE_TEMPLATE/feature_request.yml`
 - `.github/ISSUE_TEMPLATE/config.yml`
-- `.github/pull_request_template.yml`
+- `.github/PULL_REQUEST_TEMPLATE.md`
 
 ## Repository guidelines
 
