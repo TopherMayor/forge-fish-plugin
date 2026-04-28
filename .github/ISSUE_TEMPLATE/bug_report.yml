@@ -1,0 +1,54 @@
+name: Bug report
+about: Report a problem with the Forge Fish Plugin
+labels: [bug]
+description: Use this template for reproducible problems.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please include as much detail as possible.
+  - type: input
+    id: forge-version
+    attributes:
+      label: Forge version
+      placeholder: forge 2.12.9
+    validations:
+      required: true
+  - type: input
+    id: fish-version
+    attributes:
+      label: Fish version
+      placeholder: fish, version 3.7.1
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 14.0
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug and the expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Share the exact commands or prompt text.
+      placeholder: |
+        1. Open fish
+        2. Run :new
+        3. Enter ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: Paste any error messages or terminal output.
+      render: shell

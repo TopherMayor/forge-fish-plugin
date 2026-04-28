@@ -163,10 +163,23 @@ Example:
 - `setup.fish`
 - `~/.config/fish/conf.d/forge.fish`
 - `~/.config/fish/completions/forge.fish`
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `SECURITY.md`
+- `LICENSE`
+- `.github/ISSUE_TEMPLATE/bug_report.yml`
+- `.github/ISSUE_TEMPLATE/feature_request.yml`
+- `.github/ISSUE_TEMPLATE/config.yml`
+- `.github/pull_request_template.yml`
 
-## Notes
+## Repository guidelines
 
-This repo contains the fish integration files only. It is intended to be a practical fish-native equivalent of the Forge zsh plugin rather than a literal port.
+- Contributing: `CONTRIBUTING.md`
+- Code of conduct: `CODE_OF_CONDUCT.md`
+- Security reporting: `SECURITY.md`
+- License: `LICENSE`
+- Issue templates: `.github/ISSUE_TEMPLATE/`
+- Pull request template: `.github/PULL_REQUEST_TEMPLATE.md`
 
 Forge responses appear on their own line so the command flow stays close to the zsh plugin’s editor-driven output separation.
 

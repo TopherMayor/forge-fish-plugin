@@ -1,0 +1,28 @@
+name: Feature request
+about: Suggest an improvement for the Forge Fish Plugin
+labels: [enhancement]
+description: Use this template to propose a feature or workflow improvement.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. Please describe the change you would like to see.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Explain the workflow gap or pain point.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the desired behavior or UI change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Share any other approaches you considered.
