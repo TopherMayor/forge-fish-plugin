@@ -69,6 +69,12 @@ Provider login/logout commands accept either a provider name or provider ID, but
 
 Provider-related completions also expose provider IDs so the command line stays aligned with the Forge backend's identifier model.
 
+Inside the Forge prompt, Tab is also intercepted for richer UX:
+
+- `@` opens a tagged-file picker and inserts `@[...]`
+- `:` opens the Forge action picker for prompt commands
+- otherwise Tab falls back to fish's normal completion behavior
+
 ### How it loads
 
 Fish automatically loads files in `~/.config/fish/conf.d/`, so the plugin activates at shell startup without manual sourcing.
@@ -152,8 +158,8 @@ The fish plugin is functionally close to the native zsh plugin, while remaining 
 | Session continuity | Conversation, model, provider, reasoning effort, and active agent persist across fish shells via universal variables | Upstream keeps context within the current shell/plugin session | **Supported** for continuity, **Different** in implementation |
 | Prompt/status display | Fish right prompt shows Forge status, active agent, model, effort, and conversation id | Upstream uses shell-theme/RPROMPT styling | **Partial** |
 | Selectors | Fish provides pickers for conversations, models, providers, and agents | Upstream has native selection helpers | **Partial** |
-| Fish completions | Covers root commands, help targets, conversation, provider, MCP, custom command, VS Code, zsh helpers, workspace helpers, and key flags | Upstream has a richer generated completion tree | **Partial** |
-| Key bindings | Enter, Tab, Ctrl-J, and Ctrl-V are bound for Forge actions | Upstream uses `zle`-based bindings | **Partial** |
+| Fish completions | Covers root commands, help targets, conversation, provider, MCP, custom command, VS Code, zsh helpers, workspace helpers, and key flags; inside the Forge prompt, Tab also opens special pickers for `@` file tags and `:` actions before falling back to fish completion | Upstream has a richer generated completion tree | **Partial** |
+| Key bindings | Enter, Tab, Ctrl-J, and Ctrl-V are bound for Forge actions; Tab is context-aware in the prompt | Upstream uses `zle`-based bindings | **Partial** |
 | File tagging `@[...]` | Dedicated fish UX exists for tagged file selection and insertion | Upstream documents interactive file tagging | **Supported** |
 | Syntax highlighting | Lightweight live hints are shown for tags and workflow/command prefixes | Upstream provides richer visual feedback for commands and tags | **Partial** |
 | `:sync` / codebase indexing | Implemented in the fish dispatcher and documented in completions | Upstream documents codebase indexing | **Supported** |

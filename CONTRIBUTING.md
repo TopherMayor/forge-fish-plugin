@@ -7,7 +7,8 @@ Thank you for helping improve the Forge Fish Plugin.
 - Make sure `fish` is installed.
 - Clone the repository locally.
 - Run `./setup.fish --dry-run` before applying setup changes.
-- Keep changes focused on Fish-native behavior unless you are explicitly updating parity docs.
+- Run `fish -n .config/fish/conf.d/forge.fish` and `fish -n .config/fish/completions/forge.fish` after changing prompt or completion behavior.
+- If you change Tab behavior or picker UX, update the README sections that describe completions and key bindings.
 
 ## Local workflow
 

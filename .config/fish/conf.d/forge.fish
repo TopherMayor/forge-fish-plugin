@@ -359,51 +359,49 @@ if status --is-interactive
         commandline -f repaint
     end
 
-    function __forge_complete_action_names
-        printf '%s\n' \
-            help \
-            new \
-            info \
-            dump \
-            compact \
-            retry \
-            delete \
-            logs \
-            mcp \
-            cmd \
-            update \
-            vscode \
-            agent \
-            conversation \
-            conversation-rename \
-            clone \
-            rename \
-            copy \
-            model \
-            config-model \
-            config-reload \
-            reasoning-effort \
-            config-reasoning-effort \
-            config-commit-model \
-            config-suggest-model \
-            tools \
-            config \
-            config-edit \
-            skill \
-            edit \
-            commit \
-            commit-preview \
-            suggest \
-            workspace-sync \
-            sync \
-            workspace-init \
-            workspace-status \
-            workspace-info \
-            index \
-            doctor \
-            tag \
-            file
-    end
+    set -g __forge_complete_action_names \
+        help \
+        new \
+        info \
+        dump \
+        compact \
+        retry \
+        delete \
+        logs \
+        mcp \
+        cmd \
+        update \
+        vscode \
+        agent \
+        conversation \
+        conversation-rename \
+        clone \
+        rename \
+        copy \
+        model \
+        config-model \
+        config-reload \
+        reasoning-effort \
+        config-reasoning-effort \
+        config-commit-model \
+        config-suggest-model \
+        tools \
+        config \
+        config-edit \
+        skill \
+        edit \
+        commit \
+        commit-preview \
+        suggest \
+        workspace-sync \
+        sync \
+        workspace-init \
+        workspace-status \
+        workspace-info \
+        index \
+        doctor \
+        tag \
+        file
 
     function __forge_file_tag_candidates
         command $_FORGE_BIN list file --porcelain 2>/dev/null
@@ -1096,7 +1094,7 @@ if status --is-interactive
         end
 
         if string match -rq '^:\s*.*' -- $buffer
-            set -l action_list (printf '%s\n' (__forge_complete_action_names))
+            set -l action_list $__forge_complete_action_names
             set -l action_token (string replace -r '^:\s*' '' -- $token)
             if test -n "$action_list"
                 if test -n "$action_token"
